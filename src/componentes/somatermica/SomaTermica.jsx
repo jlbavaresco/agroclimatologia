@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { Container, Row, Col, Form, FloatingLabel, Button, Table } from "react-bootstrap";
 import Plot from "react-plotly.js";
+import Alerta from "../comuns/Alerta";
 
 export default function GrauDiaCalculator() {
+
+    const [alerta, setAlerta] = useState({ status: "", message: "" });
     const [formData, setFormData] = useState({
         dataSemeadura: "2024-09-01",
         tb: "10",
@@ -112,6 +115,8 @@ export default function GrauDiaCalculator() {
             setDiasLimiar({ m1: dias1, m2: dias2, m3: dias3 });
         } catch (error) {
             console.error("Erro ao consultar API:", error);
+            
+            setAlerta({ status: "error", message: error })
         }
     };
 
@@ -120,6 +125,7 @@ export default function GrauDiaCalculator() {
             <Row>
                 <Col>
                     <h2 className="text-center mb-4">Calculadora de Soma Térmica (Grau Dia)</h2>
+                    <Alerta alerta={alerta} />
                 </Col>
             </Row>
 
@@ -246,7 +252,7 @@ export default function GrauDiaCalculator() {
                                     type: "scatter",
                                     mode: "lines+markers",
                                     name: "Método 3",
-                                    line: { color: "red" },
+                                    line: { color: "yellow" },
                                 },
                                 {
                                     x: dados.map((d) => d.dia),
@@ -288,6 +294,14 @@ export default function GrauDiaCalculator() {
                                     type: "scatter",
                                     mode: "lines+markers",
                                     name: "Método 3",
+                                    line: { color: "yellow" },
+                                },
+                                {
+                                    x: dados.map((d) => d.dia),
+                                    y: dados.map((d) => d.temp),
+                                    type: "scatter",
+                                    mode: "lines+markers",
+                                    name: "Temperatura",
                                     line: { color: "red" },
                                 },
                             ]}
