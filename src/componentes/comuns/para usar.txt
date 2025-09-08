@@ -1,0 +1,25 @@
+
+import Carregando from '../../comuns/Carregando';
+
+- estado
+const [carregando, setCarregando] = useState(true);
+
+- modificar o recupera categorias
+
+    const recuperaCategorias = async () => {
+        setCarregando(true);
+        setListaObjetos(await getCategoriasAPI());
+        setCarregando(false);
+    }
+	
+-- para testar 
+	setTimeout(() => {
+		console.log("Atraso de 3 segundos.");
+		setCarregando(false);
+	  }, "3000");
+	
+- alterar onde é chamado o componente Tabela
+
+	<Carregando carregando={carregando}>
+		<Tabela />
+	</Carregando>	
