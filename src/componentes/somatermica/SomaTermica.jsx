@@ -59,7 +59,7 @@ export default function GrauDiaCalculator() {
         const end = endDate.toISOString().split("T")[0];
 
         //const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m&timezone=auto`;
-        const url = `http://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m_mean&timezone=America%2FSao_Paulo`;
+        const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m_mean&timezone=America%2FSao_Paulo`;
         console.log(url);
         try {
             const res = await fetch(url);
