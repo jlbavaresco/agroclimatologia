@@ -4,17 +4,19 @@ import { useState } from "react";
 import { Container, Row, Col, Form, FloatingLabel, Button, Table } from "react-bootstrap";
 import Plot from "react-plotly.js";
 import Alerta from "../comuns/Alerta";
+import cidadesData from "../../dados/cidades";
 
 export default function GrauDiaCalculator() {
 
     const [alerta, setAlerta] = useState({ status: "", message: "" });
+    const [cidades, setCidades] = useState(cidadesData);
     const [formData, setFormData] = useState({
         dataSemeadura: "2024-09-01",
         tb: "10",
         topt: "25",
         tmax: "34",
-        latitude: "-28.4085",
-        longitude: "-54.9613",
+        latitude: "-28.2612",
+        longitude: "-52.4083",
         limiar: "830",
     });
 
@@ -24,6 +26,19 @@ export default function GrauDiaCalculator() {
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
+
+  const handleCityChange = (e) => {
+        const cidadeNome = e.target.value;
+        const cidadeSelecionada = cidades.find(c => c.nome === cidadeNome);
+
+        if (cidadeSelecionada) {
+            setFormData({
+                ...formData,
+                latitude: cidadeSelecionada.latitude.toString(),
+                longitude: cidadeSelecionada.longitude.toString(),
+            });
+        }
+    };    
 
     // Função para calcular graus-dia por cada método
     const calcularGrausDia = (temp, tb, topt, tmax) => {
@@ -58,8 +73,8 @@ export default function GrauDiaCalculator() {
         endDate.setMonth(endDate.getMonth() - 3); // pega alguns meses à traz
         const end = endDate.toISOString().split("T")[0];
 
-        //const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m&timezone=auto`;
-        const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m_mean&timezone=America%2FSao_Paulo`;
+        const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+        const url = `${protocol}://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${startDate}&end_date=${end}&daily=temperature_2m_mean&timezone=America%2FSao_Paulo`;
         console.log(url);
         try {
             const res = await fetch(url);
@@ -115,7 +130,7 @@ export default function GrauDiaCalculator() {
             setDiasLimiar({ m1: dias1, m2: dias2, m3: dias3 });
         } catch (error) {
             console.error("Erro ao consultar API:", error);
-            
+
             setAlerta({ status: "error", message: error })
         }
     };
@@ -151,6 +166,11 @@ export default function GrauDiaCalculator() {
                         <Form.Control type="number" step="0.1" name="tmax" value={formData.tmax} onChange={handleChange} />
                     </FloatingLabel>
                 </Col>
+                <Col md>
+                    <FloatingLabel label="Limiar (graus-dia)">
+                        <Form.Control type="number" step="0.1" name="limiar" value={formData.limiar} onChange={handleChange} />
+                    </FloatingLabel>
+                </Col>
             </Row>
 
             <Row className="g-2 mt-2">
@@ -165,8 +185,15 @@ export default function GrauDiaCalculator() {
                     </FloatingLabel>
                 </Col>
                 <Col md>
-                    <FloatingLabel label="Limiar (graus-dia)">
-                        <Form.Control type="number" step="0.1" name="limiar" value={formData.limiar} onChange={handleChange} />
+                    <FloatingLabel label="Cidades">
+                        <Form.Select aria-label="Selecione uma cidade" onChange={handleCityChange}>
+                            <option value="">Selecione uma cidade</option>
+                            {cidades.map((cidade, index) => (
+                                <option key={index} value={cidade.nome}>
+                                    {cidade.nome}
+                                </option>
+                            ))}
+                        </Form.Select>
                     </FloatingLabel>
                 </Col>
             </Row>
