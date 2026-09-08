@@ -15,6 +15,7 @@ export default function WeatherDataViewer() {
         dataFinal: "",
         latitude: "-28.2612",
         longitude: "-52.4083",
+        modelo: "ecmwf_ifs", // Modelo padrão inicial
     });
 
     const [dados, setDados] = useState([]);
@@ -52,15 +53,16 @@ export default function WeatherDataViewer() {
     };
 
     const handleConsultar = async () => {
-        const { dataInicial, dataFinal, latitude, longitude } = formData;
+        const { dataInicial, dataFinal, latitude, longitude, modelo } = formData;
 
-        if (!dataInicial || !dataFinal || !latitude || !longitude) {
+        if (!dataInicial || !dataFinal || !latitude || !longitude || !modelo) {
             setAlerta({ status: "error", message: "Por favor, preencha todos os campos." });
             return;
         }
 
         const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-        const url = `${protocol}://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${dataInicial}&end_date=${dataFinal}&daily=temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum,relative_humidity_2m_mean,sunshine_duration&timezone=America%2FSao_Paulo`;
+        // Inclusão do parâmetro models=${modelo}
+        const url = `${protocol}://archive-api.open-meteo.com/v1/archive?latitude=${latitude}&longitude=${longitude}&start_date=${dataInicial}&end_date=${dataFinal}&daily=temperature_2m_mean,temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum,relative_humidity_2m_mean,sunshine_duration&models=${modelo}&timezone=America%2FSao_Paulo`;
 
         try {
             const res = await fetch(url);
@@ -139,6 +141,20 @@ export default function WeatherDataViewer() {
                     </FloatingLabel>
                 </Col>
                 <Col md>
+                    <FloatingLabel label="Modelo">
+                        <Form.Select 
+                            aria-label="Selecione um modelo" 
+                            name="modelo" 
+                            value={formData.modelo} 
+                            onChange={handleChange}
+                        >
+                            <option value="ecmwf_ifs">ECMWF IFS</option>
+                            <option value="era5_land">ERA5-Land</option>
+                            <option value="era5">ERA5</option>
+                        </Form.Select>
+                    </FloatingLabel>
+                </Col>
+                <Col md>
                     <FloatingLabel label="Latitude">
                         <Form.Control type="number" step="0.01" name="latitude" value={formData.latitude} onChange={handleChange} />
                     </FloatingLabel>
@@ -200,13 +216,13 @@ export default function WeatherDataViewer() {
                                 {dados.map((row, idx) => (
                                     <tr key={idx}>
                                         <td>{row.date}</td>
-                                        <td>{row.tempMin.toFixed(1)}</td>
-                                        <td>{row.tempMean.toFixed(1)}</td>
-                                        <td>{row.tempMax.toFixed(1)}</td>
-                                        <td>{row.precipitation.toFixed(1)}</td>
-                                        <td>{row.radiation.toFixed(1)}</td>
-                                        <td>{row.humidity.toFixed(1)}</td>
-                                        <td>{row.sunshineHours.toFixed(1)}</td>
+                                        <td>{row.tempMin?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.tempMean?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.tempMax?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.precipitation?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.radiation?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.humidity?.toFixed(1) ?? "-"}</td>
+                                        <td>{row.sunshineHours?.toFixed(1) ?? "-"}</td>
                                     </tr>
                                 ))}
                             </tbody>
